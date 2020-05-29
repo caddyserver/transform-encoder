@@ -10,7 +10,7 @@ braces `{}` and filled by values extracted from the stucture of the JSON log enc
 }
 ```
 
-The nesting is traversed using `>`. For example, to print the `uri` field, the traversal is templated as `{request>method}`.
+The nesting is traversed using `>`. For example, to print the `uri` field, the traversal is templated as `{request>uri}`.
 
 ```json
 {
