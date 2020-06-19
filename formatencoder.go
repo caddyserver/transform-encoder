@@ -21,6 +21,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
+	"github.com/caddyserver/caddy/v2/modules/logging"
 	"go.uber.org/zap/buffer"
 	"go.uber.org/zap/zapcore"
 )
@@ -35,9 +36,9 @@ const commonLogFormat = `{common_log}`
 // encoder builds atop the json encoder, thus it follows its message structure. The placeholders
 // are namespaced by the name of the app logging the message.
 type FormattedEncoder struct {
+	logging.LogEncoderConfig
 	zapcore.Encoder `json:"-"`
-	LogEncoderConfig
-	Template string `json:"template,omitempty"`
+	Template        string `json:"template,omitempty"`
 }
 
 func (FormattedEncoder) CaddyModule() caddy.ModuleInfo {
@@ -45,7 +46,7 @@ func (FormattedEncoder) CaddyModule() caddy.ModuleInfo {
 		ID: "caddy.logging.encoders.formatted",
 		New: func() caddy.Module {
 			return &FormattedEncoder{
-				Encoder: new(JSONEncoder),
+				Encoder: new(logging.JSONEncoder),
 			}
 		},
 	}
