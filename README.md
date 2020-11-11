@@ -30,6 +30,8 @@ log {
 }
 ```
 
+The syntax of `template` is defined by the package [github.com/buger/jsonparser](https://github.com/buger/jsonparser). Objects are traversed using the key name. Arrays can be traversed by using the format `[index]`, as in `[0]`. For example, to get the first element in the `User-Agent` array, the template is `{request>headers>User-Agent>[0]}`.
+
 ## Install
 
 First, the [xcaddy](https://github.com/caddyserver/xcaddy) command:
