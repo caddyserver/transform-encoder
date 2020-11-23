@@ -20,7 +20,6 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/caddyserver/caddy/v2"
-	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/modules/logging"
 	"go.uber.org/zap/buffer"
 	"go.uber.org/zap/zapcore"
@@ -39,6 +38,7 @@ type FormattedEncoder struct {
 	logging.LogEncoderConfig
 	zapcore.Encoder `json:"-"`
 	Template        string `json:"template,omitempty"`
+	Placeholder     string `json:"placeholder,omitempty"`
 }
 
 func (FormattedEncoder) CaddyModule() caddy.ModuleInfo {
@@ -57,6 +57,9 @@ func (se *FormattedEncoder) Provision(ctx caddy.Context) error {
 	if se.Template == "" {
 		return fmt.Errorf("missing template for formatted log encoder")
 	}
+	if se.Placeholder == "" {
+		se.Placeholder = `-`
+	}
 	se.Encoder = zapcore.NewJSONEncoder(se.ZapcoreEncoderConfig())
 	return nil
 }
@@ -68,8 +71,9 @@ func (se *FormattedEncoder) Provision(ctx caddy.Context) error {
 // we'd lose our FormattedEncoder's EncodeEntry.
 func (se FormattedEncoder) Clone() zapcore.Encoder {
 	return FormattedEncoder{
-		Encoder:  se.Encoder.Clone(),
-		Template: se.Template,
+		Encoder:     se.Encoder.Clone(),
+		Template:    se.Template,
+		Placeholder: se.Placeholder,
 	}
 }
 
@@ -97,7 +101,7 @@ func (se FormattedEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 		}
 	})
 
-	out := repl.ReplaceKnown(se.Template, "")
+	out := repl.ReplaceAll(se.Template, se.Placeholder)
 	// The buffer is only used to find the values of placeholders.
 	// The content has served its purpose. It's time for it to go to repurpose the buffer.
 	buf.Reset()
@@ -108,22 +112,4 @@ func (se FormattedEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 		buf.AppendByte('\n')
 	}
 	return buf, err
-}
-
-// UnmarshalCaddyfile sets up the module from Caddyfile tokens. Syntax:
-//
-//     formatted <template>
-//
-// If the value of "template" is omitted, Common Log Format is assumed.
-// See the godoc on the LogEncoderConfig type for the syntax of
-// subdirectives that are common to most/all encoders.
-func (se *FormattedEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
-	for d.Next() {
-		var template string
-		if !d.AllArgs(&template) {
-			template = commonLogFormat
-		}
-		se.Template = template
-	}
-	return nil
 }
