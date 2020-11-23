@@ -15,6 +15,8 @@
 package formatencoder
 
 import (
+	"strings"
+
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 )
 
@@ -33,10 +35,8 @@ func (se *FormattedEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 		switch len(args) {
 		case 0:
 			se.Template = commonLogFormat
-		case 1:
-			se.Template = args[0]
 		default:
-			return d.Errf("unexpected number of arguments: %d", len(args))
+			se.Template = strings.Join(args, " ")
 		}
 
 		for nesting := d.Nesting(); d.NextBlock(nesting); {

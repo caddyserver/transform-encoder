@@ -59,6 +59,16 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "multiple argument",
+			fields: fields{
+				Template: "{obj1>obj2>[0]} - {obj3>[2]}",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`formatted {obj1>obj2>[0]} - {obj3>[2]}`),
+			},
+			wantErr: false,
+		},
+		{
 			name: "not template but given placeholder",
 			fields: fields{
 				Template:    commonLogFormat,
