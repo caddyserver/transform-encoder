@@ -26,7 +26,18 @@ The Caddyfile configuration accepts the template immediately following the encod
 
 ```caddyfile
 log {
-	format formatted <template>
+	format formatted [<template>] {
+		placeholder <string>
+		message_key <key>
+		level_key   <key>
+		time_key    <key>
+		name_key    <key>
+		caller_key  <key>
+		stacktrace_key <key>
+		line_ending  <char>
+		time_format  <format>
+		level_format <format>
+	}
 }
 ```
 
