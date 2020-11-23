@@ -21,8 +21,8 @@ import (
 // UnmarshalCaddyfile sets up the module from Caddyfile tokens. Syntax:
 //
 //     formatted [<template>] [{
-//			placeholder	[<placeholder>]
-//		}]
+//          placeholder	[<placeholder>]
+//     }]
 //
 // If the value of "template" is omitted, Common Log Format is assumed.
 // See the godoc on the LogEncoderConfig type for the syntax of
