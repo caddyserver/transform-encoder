@@ -1,4 +1,4 @@
-Formtted Encoder Module for Caddy's Logger
+Formatted Encoder Module for Caddy's Logger
 ===============================================
 
 This plugin adds logging encoder named `formatted`. The module accepts a `template` with the placeholders are surrounded by
