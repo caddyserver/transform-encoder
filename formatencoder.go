@@ -29,7 +29,14 @@ func init() {
 	caddy.RegisterModule(FormattedEncoder{})
 }
 
-const commonLogFormat = `{common_log}`
+const (
+	// commonLogFormat is the common log format. https://en.wikipedia.org/wiki/Common_Log_Format
+	commonLogEmptyValue = "-"
+	commonLogFormat     = `{request>remote>host} ` + commonLogEmptyValue + ` {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}`
+	commonLogTimeFormat = "02/Jan/2006:15:04:05 -0700"
+
+	commonLogFormatShortcut = `{common_log}`
+)
 
 // FormattedEncoder allows the user to provide custom template for log prints. The
 // encoder builds atop the json encoder, thus it follows its message structure. The placeholders
@@ -57,8 +64,14 @@ func (se *FormattedEncoder) Provision(ctx caddy.Context) error {
 	if se.Template == "" {
 		return fmt.Errorf("missing template for formatted log encoder")
 	}
+	if se.Template == commonLogFormatShortcut {
+		se.Template = commonLogFormat
+	}
+	if se.Template == commonLogFormat {
+		se.TimeFormat = commonLogTimeFormat
+	}
 	if se.Placeholder == "" {
-		se.Placeholder = `-`
+		se.Placeholder = commonLogEmptyValue
 	}
 	se.Encoder = zapcore.NewJSONEncoder(se.ZapcoreEncoderConfig())
 	return nil
@@ -71,9 +84,10 @@ func (se *FormattedEncoder) Provision(ctx caddy.Context) error {
 // we'd lose our FormattedEncoder's EncodeEntry.
 func (se FormattedEncoder) Clone() zapcore.Encoder {
 	return FormattedEncoder{
-		Encoder:     se.Encoder.Clone(),
-		Template:    se.Template,
-		Placeholder: se.Placeholder,
+		LogEncoderConfig: se.LogEncoderConfig,
+		Encoder:          se.Encoder.Clone(),
+		Template:         se.Template,
+		Placeholder:      se.Placeholder,
 	}
 }
 
