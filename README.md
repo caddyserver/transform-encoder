@@ -48,7 +48,7 @@ The syntax of `template` is defined by the package [github.com/buger/jsonparser]
 First, the [xcaddy](https://github.com/caddyserver/xcaddy) command:
 
 ```shell
-$ go get -u github.com/caddyserver/xcaddy/cmd/xcaddy
+$ go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 ```
 
 Then build Caddy with this Go module plugged in. For example:
