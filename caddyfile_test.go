@@ -97,11 +97,11 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			se := &FormattedEncoder{
+			se := &TransformEncoder{
 				Encoder: new(logging.JSONEncoder),
 			}
 			if err := se.UnmarshalCaddyfile(tt.args.d); (err != nil) != tt.wantErr {
-				t.Errorf("FormattedEncoder.UnmarshalCaddyfile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("TransformEncoder.UnmarshalCaddyfile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if se.Template != tt.fields.Template || se.Placeholder != tt.fields.Placeholder {
 				t.Errorf("Unexpected marshalling error: expected = %+v, received: %+v", tt.fields, se)

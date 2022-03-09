@@ -29,7 +29,7 @@ import (
 // If the value of "template" is omitted, Common Log Format is assumed.
 // See the godoc on the LogEncoderConfig type for the syntax of
 // subdirectives that are common to most/all encoders.
-func (se *FormattedEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
+func (se *TransformEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	for d.Next() {
 		args := d.RemainingArgs()
 		switch len(args) {

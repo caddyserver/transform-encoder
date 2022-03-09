@@ -1,4 +1,4 @@
-module github.com/caddyserver/format-encoder
+module github.com/caddyserver/transform-encoder
 
 go 1.14
 
