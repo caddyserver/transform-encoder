@@ -30,7 +30,14 @@ func init() {
 	caddy.RegisterModule(compat{})
 }
 
-const commonLogFormat = `{common_log}`
+const (
+	// commonLogFormat is the common log format. https://en.wikipedia.org/wiki/Common_Log_Format
+	commonLogEmptyValue = "-"
+	commonLogFormat     = `{request>remote_addr} ` + commonLogEmptyValue + ` {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}`
+	commonLogTimeFormat = "02/Jan/2006:15:04:05 -0700"
+
+	commonLogFormatShortcut = `{common_log}`
+)
 
 // FormattedEncoder alias is kept for backward compatibility
 type FormattedEncoder = TransformEncoder
@@ -75,8 +82,14 @@ func (se *TransformEncoder) Provision(ctx caddy.Context) error {
 	if se.Template == "" {
 		return fmt.Errorf("missing template for formatted log encoder")
 	}
+	if se.Template == commonLogFormatShortcut {
+		se.Template = commonLogFormat
+	}
+	if se.Template == commonLogFormat {
+		se.TimeFormat = commonLogTimeFormat
+	}
 	if se.Placeholder == "" {
-		se.Placeholder = `-`
+		se.Placeholder = commonLogEmptyValue
 	}
 	se.Encoder = zapcore.NewJSONEncoder(se.ZapcoreEncoderConfig())
 	return nil
@@ -87,11 +100,12 @@ func (se *TransformEncoder) Provision(ctx caddy.Context) error {
 // and if we simply let the embedded encoder's Clone
 // be promoted, it would return a clone of that, and
 // we'd lose our FormattedEncoder's EncodeEntry.
-func (se TransformEncoder) Clone() zapcore.Encoder {
-	return TransformEncoder{
-		Encoder:     se.Encoder.Clone(),
-		Template:    se.Template,
-		Placeholder: se.Placeholder,
+func (se FormattedEncoder) Clone() zapcore.Encoder {
+	return FormattedEncoder{
+		LogEncoderConfig: se.LogEncoderConfig,
+		Encoder:          se.Encoder.Clone(),
+		Template:         se.Template,
+		Placeholder:      se.Placeholder,
 	}
 }
 
