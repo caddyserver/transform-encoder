@@ -1,11 +1,11 @@
-Formatted Encoder Module for Caddy's Logger
+Transform Encoder Module for Caddy's Logger
 ===============================================
 
-This plugin adds logging encoder named `formatted`. The module accepts a `template` with the placeholders are surrounded by
+This module adds logging encoder named `transform`. The module accepts a `template` with the placeholders are surrounded by
 braces `{}` and filled by values extracted from the stucture of the JSON log encoder. The JSON configuration looks like this:
 ```json
 {
-	"encoder": "formatted",
+	"encoder": "transform",
 	"template": "{...}"
 }
 ```
@@ -26,7 +26,7 @@ The Caddyfile configuration accepts the template immediately following the encod
 
 ```caddyfile
 log {
-	format formatted [<template>] {
+	format transform [<template>] {
 		placeholder <string>
 		message_key <key>
 		level_key   <key>
@@ -43,6 +43,20 @@ log {
 
 The syntax of `template` is defined by the package [github.com/buger/jsonparser](https://github.com/buger/jsonparser). Objects are traversed using the key name. Arrays can be traversed by using the format `[index]`, as in `[0]`. For example, to get the first element in the `User-Agent` array, the template is `{request>headers>User-Agent>[0]}`.
 
+## Apache Common Log Format Example 
+
+The module comes with one special value of `{common_log}` for the Apache Common Log format to simplify configuration
+
+```caddyfile
+ format transform "{common_log}"
+```
+
+The more spelled out way of doing it is:
+
+```caddyfile
+format transform {request>remote_addr} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}
+```
+
 ## Install
 
 First, the [xcaddy](https://github.com/caddyserver/xcaddy) command:
@@ -54,6 +68,6 @@ $ go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 Then build Caddy with this Go module plugged in. For example:
 
 ```shell
-$ xcaddy build --with github.com/caddyserver/format-encoder
+$ xcaddy build --with github.com/caddyserver/transform-encoder
 ```
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package formatencoder
+package transformencoder
 
 import (
 	"fmt"
@@ -99,9 +99,9 @@ func (se *TransformEncoder) Provision(ctx caddy.Context) error {
 // necessary because we implement our own EncodeEntry,
 // and if we simply let the embedded encoder's Clone
 // be promoted, it would return a clone of that, and
-// we'd lose our FormattedEncoder's EncodeEntry.
-func (se FormattedEncoder) Clone() zapcore.Encoder {
-	return FormattedEncoder{
+// we'd lose our TransformEncoder's EncodeEntry.
+func (se TransformEncoder) Clone() zapcore.Encoder {
+	return TransformEncoder{
 		LogEncoderConfig: se.LogEncoderConfig,
 		Encoder:          se.Encoder.Clone(),
 		Template:         se.Template,

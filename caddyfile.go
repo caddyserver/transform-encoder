@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package formatencoder
+package transformencoder
 
 import (
 	"strings"
@@ -22,7 +22,7 @@ import (
 
 // UnmarshalCaddyfile sets up the module from Caddyfile tokens. Syntax:
 //
-//     formatted [<template>] [{
+//     transform [<template>] [{
 //          placeholder	[<placeholder>]
 //     }]
 //
