@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package formatencoder
+package transformencoder
 
 import (
 	"strings"
@@ -22,14 +22,14 @@ import (
 
 // UnmarshalCaddyfile sets up the module from Caddyfile tokens. Syntax:
 //
-//     formatted [<template>] [{
+//     transform [<template>] [{
 //          placeholder	[<placeholder>]
 //     }]
 //
 // If the value of "template" is omitted, Common Log Format is assumed.
 // See the godoc on the LogEncoderConfig type for the syntax of
 // subdirectives that are common to most/all encoders.
-func (se *FormattedEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
+func (se *TransformEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	for d.Next() {
 		args := d.RemainingArgs()
 		switch len(args) {

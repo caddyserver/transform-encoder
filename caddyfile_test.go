@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package formatencoder
+package transformencoder
 
 import (
 	"testing"
@@ -38,8 +38,9 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
+		// old name
 		{
-			name: "no args",
+			name: "formatted: no args",
 			fields: fields{
 				Template: commonLogFormat,
 			},
@@ -49,7 +50,7 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "single argument",
+			name: "formatted: single argument",
 			fields: fields{
 				Template: "{obj1>obj2>[0]}",
 			},
@@ -59,7 +60,7 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "multiple argument",
+			name: "formatted: multiple argument",
 			fields: fields{
 				Template: "{obj1>obj2>[0]} - {obj3>[2]}",
 			},
@@ -69,7 +70,7 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "not template but given placeholder",
+			name: "formatted: not template but given placeholder",
 			fields: fields{
 				Template:    commonLogFormat,
 				Placeholder: "|",
@@ -82,7 +83,7 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "given template and given placeholder",
+			name: "formatted: given template and given placeholder",
 			fields: fields{
 				Template:    "{obj1>obj2>[0]}",
 				Placeholder: "|",
@@ -94,14 +95,71 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		// new name
+		{
+			name: "transform: no args",
+			fields: fields{
+				Template: commonLogFormat,
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: single argument",
+			fields: fields{
+				Template: "{obj1>obj2>[0]}",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}"`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: multiple argument",
+			fields: fields{
+				Template: "{obj1>obj2>[0]} - {obj3>[2]}",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform {obj1>obj2>[0]} - {obj3>[2]}`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: not template but given placeholder",
+			fields: fields{
+				Template:    commonLogFormat,
+				Placeholder: "|",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform {
+					placeholder |
+				}`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: given template and given placeholder",
+			fields: fields{
+				Template:    "{obj1>obj2>[0]}",
+				Placeholder: "|",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}" {
+					placeholder |
+				}`),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			se := &FormattedEncoder{
+			se := &TransformEncoder{
 				Encoder: new(logging.JSONEncoder),
 			}
 			if err := se.UnmarshalCaddyfile(tt.args.d); (err != nil) != tt.wantErr {
-				t.Errorf("FormattedEncoder.UnmarshalCaddyfile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("TransformEncoder.UnmarshalCaddyfile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if se.Template != tt.fields.Template || se.Placeholder != tt.fields.Placeholder {
 				t.Errorf("Unexpected marshalling error: expected = %+v, received: %+v", tt.fields, se)

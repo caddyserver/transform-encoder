@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package formatencoder
+package transformencoder
 
 import (
 	"fmt"
@@ -26,7 +26,8 @@ import (
 )
 
 func init() {
-	caddy.RegisterModule(FormattedEncoder{})
+	caddy.RegisterModule(TransformEncoder{})
+	caddy.RegisterModule(compat{})
 }
 
 const (
@@ -38,21 +39,38 @@ const (
 	commonLogFormatShortcut = `{common_log}`
 )
 
-// FormattedEncoder allows the user to provide custom template for log prints. The
+// FormattedEncoder alias is kept for backward compatibility
+type FormattedEncoder = TransformEncoder
+type compat struct {
+	TransformEncoder
+}
+
+func (we compat) CaddyModule() caddy.ModuleInfo {
+	return caddy.ModuleInfo{
+		ID: "caddy.logging.encoders.formatted",
+		New: func() caddy.Module {
+			return &TransformEncoder{
+				Encoder: new(logging.JSONEncoder),
+			}
+		},
+	}
+}
+
+// TransformEncoder allows the user to provide custom template for log prints. The
 // encoder builds atop the json encoder, thus it follows its message structure. The placeholders
 // are namespaced by the name of the app logging the message.
-type FormattedEncoder struct {
+type TransformEncoder struct {
 	logging.LogEncoderConfig
 	zapcore.Encoder `json:"-"`
 	Template        string `json:"template,omitempty"`
 	Placeholder     string `json:"placeholder,omitempty"`
 }
 
-func (FormattedEncoder) CaddyModule() caddy.ModuleInfo {
+func (TransformEncoder) CaddyModule() caddy.ModuleInfo {
 	return caddy.ModuleInfo{
-		ID: "caddy.logging.encoders.formatted",
+		ID: "caddy.logging.encoders.transform",
 		New: func() caddy.Module {
-			return &FormattedEncoder{
+			return &TransformEncoder{
 				Encoder: new(logging.JSONEncoder),
 			}
 		},
@@ -60,7 +78,7 @@ func (FormattedEncoder) CaddyModule() caddy.ModuleInfo {
 }
 
 // Provision sets up the encoder.
-func (se *FormattedEncoder) Provision(ctx caddy.Context) error {
+func (se *TransformEncoder) Provision(ctx caddy.Context) error {
 	if se.Template == "" {
 		return fmt.Errorf("missing template for formatted log encoder")
 	}
@@ -81,9 +99,9 @@ func (se *FormattedEncoder) Provision(ctx caddy.Context) error {
 // necessary because we implement our own EncodeEntry,
 // and if we simply let the embedded encoder's Clone
 // be promoted, it would return a clone of that, and
-// we'd lose our FormattedEncoder's EncodeEntry.
-func (se FormattedEncoder) Clone() zapcore.Encoder {
-	return FormattedEncoder{
+// we'd lose our TransformEncoder's EncodeEntry.
+func (se TransformEncoder) Clone() zapcore.Encoder {
+	return TransformEncoder{
 		LogEncoderConfig: se.LogEncoderConfig,
 		Encoder:          se.Encoder.Clone(),
 		Template:         se.Template,
@@ -92,7 +110,7 @@ func (se FormattedEncoder) Clone() zapcore.Encoder {
 }
 
 // EncodeEntry partially implements the zapcore.Encoder interface.
-func (se FormattedEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field) (*buffer.Buffer, error) {
+func (se TransformEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field) (*buffer.Buffer, error) {
 	repl := caddy.NewReplacer()
 	buf, err := se.Encoder.EncodeEntry(ent, fields)
 	if err != nil {
@@ -127,3 +145,5 @@ func (se FormattedEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 	}
 	return buf, err
 }
+
+var _ caddy.Module = (*TransformEncoder)(nil)
