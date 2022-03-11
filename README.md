@@ -54,7 +54,7 @@ The module comes with one special value of `{common_log}` for the Apache Common 
 The more spelled out way of doing it is:
 
 ```caddyfile
-format transform {request>remote_addr} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}
+format transform {request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}
 ```
 
 ## Install
