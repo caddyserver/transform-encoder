@@ -59,7 +59,7 @@ format transform `{request>remote_addr} - {request>user_id} [{ts}] "{request>met
 }
 ```
 
-## Nginx Combined Log Format Example
+## Apache Combined Log Format Example
 
 The more spelled out way of doing it is:
 
