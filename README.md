@@ -43,7 +43,9 @@ log {
 
 The syntax of `template` is defined by the package [github.com/buger/jsonparser](https://github.com/buger/jsonparser). Objects are traversed using the key name. Arrays can be traversed by using the format `[index]`, as in `[0]`. For example, to get the first element in the `User-Agent` array, the template is `{request>headers>User-Agent>[0]}`.
 
-## Apache Common Log Format Example 
+## Examples
+
+### Apache Common Log Format Example 
 
 The module comes with one special value of `{common_log}` for the Apache Common Log format to simplify configuration
 
@@ -59,7 +61,7 @@ format transform `{request>remote_addr} - {request>user_id} [{ts}] "{request>met
 }
 ```
 
-## Apache Combined Log Format Example
+### Apache Combined Log Format Example
 
 The more spelled out way of doing it is:
 
