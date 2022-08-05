@@ -152,6 +152,16 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "transform: multiple argument with alternative value.",
+			fields: fields{
+				Template: "{obj1>obj2>[0]:-obj3[0]} - {obj3>[2]:-obj1>obj2>[0]}",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform {obj1>obj2>[0]:-obj3[0]} - {obj3>[2]:-obj1>obj2>[0]}`),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
