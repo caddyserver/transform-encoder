@@ -91,8 +91,7 @@ format transform `{request>headers>X-Forwarded-For[0]:request>remote_ip} - {requ
 
 The character `:` act as indicator for alternative value if the preceding key is not set.
 
-For example, `{request>headers>X-Forwarded-For[0]:request>remote_ip}` means that if `X-Forwarded-For` first array value
-is not empty use that otherwise fallback on `remote_addr`.
+For example, `{request>headers>X-Forwarded-For>[0]:request>remote_ip}` means that if `X-Forwarded-For` first array value is not empty use that otherwise fallback on `remote_addr`.
 
 ## Install
 
