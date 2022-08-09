@@ -117,11 +117,11 @@ func (se TransformEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 		return buf, err
 	}
 	repl.Map(func(key string) (interface{}, bool) {
-		if strings.Contains(key, ":-") {
-			for _, slice := range strings.Split(key, ":-") {
-				val, noerr := getValue(buf, slice)
-				if noerr {
-					return val, noerr
+		if strings.Contains(key, ":") {
+			for _, slice := range strings.Split(key, ":") {
+				val, found := getValue(buf, slice)
+				if found {
+					return val, found
 				}
 			}
 			// No match found.
