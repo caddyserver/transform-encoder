@@ -117,20 +117,18 @@ func (se TransformEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 		return buf, err
 	}
 	repl.Map(func(key string) (interface{}, bool) {
-		path := strings.Split(key, ">")
-		value, dataType, _, err := jsonparser.Get(buf.Bytes(), path...)
-		if err != nil {
+		if strings.Contains(key, ":") {
+			for _, slice := range strings.Split(key, ":") {
+				val, found := getValue(buf, slice)
+				if found {
+					return val, found
+				}
+			}
+			// No match found.
 			return nil, false
 		}
-		switch dataType {
-		case jsonparser.NotExist:
-			return nil, false
-		case jsonparser.Array, jsonparser.Boolean, jsonparser.Null, jsonparser.Number, jsonparser.Object, jsonparser.String, jsonparser.Unknown:
-			// if a value exists, return it as is. A byte is a byte is a byte. The replacer handles them just fine.
-			return value, true
-		default:
-			return nil, false
-		}
+
+		return getValue(buf, key)
 	})
 
 	out := repl.ReplaceAll(se.Template, se.Placeholder)
@@ -144,6 +142,23 @@ func (se TransformEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 		buf.AppendByte('\n')
 	}
 	return buf, err
+}
+
+func getValue(buf *buffer.Buffer, key string) (interface{}, bool) {
+	path := strings.Split(key, ">")
+	value, dataType, _, err := jsonparser.Get(buf.Bytes(), path...)
+	if err != nil {
+		return nil, false
+	}
+	switch dataType {
+	case jsonparser.NotExist:
+		return nil, false
+	case jsonparser.Array, jsonparser.Boolean, jsonparser.Null, jsonparser.Number, jsonparser.Object, jsonparser.String, jsonparser.Unknown:
+		// if a value exists, return it as is. A byte is a byte is a byte. The replacer handles them just fine.
+		return value, true
+	default:
+		return nil, false
+	}
 }
 
 var _ caddy.Module = (*TransformEncoder)(nil)
