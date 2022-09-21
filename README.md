@@ -84,7 +84,7 @@ You can use an alternative value by using the following syntax `{val1:val2}`. Fo
 header as `remote_addr` replacement you can do the following
 
 ```caddy
-format transform `{request>headers>X-Forwarded-For[0]:request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
+format transform `{request>headers>X-Forwarded-For>[0]:request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
         time_format "02/Jan/2006:15:04:05 -0700"
 }
 ```
