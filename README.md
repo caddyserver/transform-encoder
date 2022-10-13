@@ -63,7 +63,7 @@ The module comes with one special value of `{common_log}` for the Apache Common 
 The more spelled out way of doing it is:
 
 ```caddyfile
-format transform `{request>remote_addr} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}` {
+format transform `{request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}` {
 	time_format "02/Jan/2006:15:04:05 -0700"
 }
 ```
@@ -73,7 +73,7 @@ format transform `{request>remote_addr} - {request>user_id} [{ts}] "{request>met
 The more spelled out way of doing it is:
 
 ```caddy
-format transform `{request>remote_addr} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
+format transform `{request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
         time_format "02/Jan/2006:15:04:05 -0700"
 }
 ```
@@ -81,7 +81,7 @@ format transform `{request>remote_addr} - {request>user_id} [{ts}] "{request>met
 # Alternative value
 
 You can use an alternative value by using the following syntax `{val1:val2}`. For example, to show the `X-Forwarded-For`
-header as `remote_addr` replacement you can do the following
+header as `remote_ip` replacement you can do the following
 
 ```caddy
 format transform `{request>headers>X-Forwarded-For>[0]:request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
@@ -91,7 +91,7 @@ format transform `{request>headers>X-Forwarded-For>[0]:request>remote_ip} - {req
 
 The character `:` act as indicator for alternative value if the preceding key is not set.
 
-For example, `{request>headers>X-Forwarded-For>[0]:request>remote_ip}` means that if `X-Forwarded-For` first array value is not empty use that otherwise fallback on `remote_addr`.
+For example, `{request>headers>X-Forwarded-For>[0]:request>remote_ip}` means that if `X-Forwarded-For` first array value is not empty use that otherwise fallback on `remote_ip`.
 
 ## Install
 
