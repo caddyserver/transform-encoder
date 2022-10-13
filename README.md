@@ -107,3 +107,9 @@ Then build Caddy with this Go module plugged in. For example:
 $ xcaddy build --with github.com/caddyserver/transform-encoder
 ```
 
+Alternatively, Caddy 2.4.4 and up supports adding a module directly:
+```shell
+$ caddy add-package github.com/caddyserver/transform-encoder
+```
+
+Note that in all cases Caddy should be stopped and started to get the module loaded, and future updates should be conducted through either xcaddy (if built with xcaddy) or `caddy upgrade` (if added with `add-package`).
