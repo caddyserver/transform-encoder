@@ -162,6 +162,68 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "transform: consume `placeholder` then delegate unmarshaling",
+			fields: fields{
+				LogEncoderConfig: logging.LogEncoderConfig{
+					TimeLocal: true,
+				},
+				Template:    "{obj1>obj2>[0]}",
+				Placeholder: "|",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}" {
+					placeholder |
+					time_local
+				}`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: delegate unmarshaling in absence of `placeholder`",
+			fields: fields{
+				LogEncoderConfig: logging.LogEncoderConfig{
+					TimeLocal: true,
+				},
+				Template: "{obj1>obj2>[0]}",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}" {
+					time_local
+				}`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: delegate unmarshaling in absence of template and `placeholder",
+			fields: fields{
+				LogEncoderConfig: logging.LogEncoderConfig{
+					TimeLocal: true,
+				},
+				Template: commonLogFormat,
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform {
+					time_local
+				}`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: delegate unmarshaling in presence of template and absence of `placeholder",
+			fields: fields{
+				LogEncoderConfig: logging.LogEncoderConfig{
+					TimeLocal: true,
+				},
+				Template: "{obj1>obj2>[0]}",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}" {
+					time_local
+				}`),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -171,8 +233,8 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			if err := se.UnmarshalCaddyfile(tt.args.d); (err != nil) != tt.wantErr {
 				t.Errorf("TransformEncoder.UnmarshalCaddyfile() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if se.Template != tt.fields.Template || se.Placeholder != tt.fields.Placeholder {
-				t.Errorf("Unexpected marshalling error: expected = %+v, received: %+v", tt.fields, se)
+			if se.Template != tt.fields.Template || se.Placeholder != tt.fields.Placeholder || se.LogEncoderConfig != tt.fields.LogEncoderConfig {
+				t.Errorf("Unexpected marshalling error: expected = %+v, received: %+v", tt.fields, *se)
 			}
 		})
 	}
