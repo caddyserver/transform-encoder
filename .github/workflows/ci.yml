@@ -1,0 +1,84 @@
+# Used as inspiration: https://github.com/mvdan/github-actions-golang
+
+name: Tests
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  test:
+    strategy:
+      # Default is true, cancels jobs for other platforms in the matrix if one fails
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        go: [ '1.18', '1.19' ]
+
+        include:
+        # Set the minimum Go patch version for the given Go minor
+        # Usable via ${{ matrix.GO_SEMVER }}
+        - go: '1.18'
+          GO_SEMVER: '~1.18.4'
+
+        - go: '1.19'
+          GO_SEMVER: '~1.19.0'
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ matrix.GO_SEMVER }}
+        check-latest: true
+
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Print Go version and environment
+      id: vars
+      run: |
+        printf "Using go at: $(which go)\n"
+        printf "Go version: $(go version)\n"
+        printf "\n\nGo environment:\n\n"
+        go env
+        printf "\n\nSystem environment:\n\n"
+        env
+        printf "Git version: $(git version)\n\n"
+        # Calculate the short SHA1 hash of the git commit
+        echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
+
+    - name: Cache the build cache
+      uses: actions/cache@v2
+      with:
+        # In order:
+        # * Module download cache
+        # * Build cache (Linux)
+        # * Build cache (Mac)
+        # * Build cache (Windows)
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+          ~/Library/Caches/go-build
+          ~\AppData\Local\go-build
+        key: ${{ runner.os }}-${{ matrix.go }}-go-ci-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.go }}-go-ci
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+
+    # Commented bits below were useful to allow the job to continue
+    # even if the tests fail, so we can publish the report separately
+    # For info about set-output, see https://stackoverflow.com/questions/57850553/github-actions-check-steps-status
+    - name: Run tests
+      # id: step_test
+      # continue-on-error: true
+      run: |
+        go test -v -short -race ./...
