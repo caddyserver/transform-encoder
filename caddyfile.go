@@ -22,54 +22,42 @@ import (
 
 // UnmarshalCaddyfile sets up the module from Caddyfile tokens. Syntax:
 //
-//     transform [<template>] [{
-//          placeholder	[<placeholder>]
-//     }]
+//	transform [<template>] [{
+//	     placeholder	[<placeholder>]
+//	}]
 //
 // If the value of "template" is omitted, Common Log Format is assumed.
 // See the godoc on the LogEncoderConfig type for the syntax of
 // subdirectives that are common to most/all encoders.
 func (se *TransformEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
+	foundTemplate := false
+outerloop:
 	for d.Next() {
 		args := d.RemainingArgs()
 		switch len(args) {
 		case 0:
 			se.Template = commonLogFormat
 		default:
+			foundTemplate = true
 			se.Template = strings.Join(args, " ")
 		}
 
 		for nesting := d.Nesting(); d.NextBlock(nesting); {
-			subdir := d.Val()
-			var arg string
-			if !d.AllArgs(&arg) {
-				return d.ArgErr()
-			}
-			switch subdir {
-			case "message_key":
-				se.MessageKey = &arg
-			case "level_key":
-				se.LevelKey = &arg
-			case "time_key":
-				se.TimeKey = &arg
-			case "name_key":
-				se.NameKey = &arg
-			case "caller_key":
-				se.CallerKey = &arg
-			case "stacktrace_key":
-				se.StacktraceKey = &arg
-			case "line_ending":
-				se.LineEnding = &arg
-			case "time_format":
-				se.TimeFormat = arg
-			case "level_format":
-				se.LevelFormat = arg
-			case "placeholder":
-				se.Placeholder = arg
-			default:
-				return d.Errf("unrecognized subdirective %s", subdir)
+			if d.Val() == "placeholder" {
+				d.AllArgs(&se.Placeholder)
+				// delete the `placeholder` token and the value, and reset the cursor
+				d.Delete()
+				d.Delete()
+				break outerloop
 			}
 		}
 	}
-	return nil
+
+	d.Reset()
+	// consume the directive and the template
+	d.Next()
+	if foundTemplate {
+		d.Next()
+	}
+	return (&se.LogEncoderConfig).UnmarshalCaddyfile(d)
 }
