@@ -27,21 +27,13 @@ The nesting is traversed using `>`. For example, to print the `uri` field, the t
 ```
 
 The Caddyfile configuration accepts the template immediately following the encoder name, and can be ommitted to assume
-Apache Common Log Format.
+Apache Common Log Format. The body of the block accepts the custom `placeholder` property in addition to all the properties listed within the [format modules section](https://caddyserver.com/docs/caddyfile/directives/log#format-modules).
 
 ```caddyfile
 log {
 	format transform [<template>] {
 		placeholder <string>
-		message_key <key>
-		level_key   <key>
-		time_key    <key>
-		name_key    <key>
-		caller_key  <key>
-		stacktrace_key <key>
-		line_ending  <char>
-		time_format  <format>
-		level_format <format>
+		# other fields accepted by JSON encoder
 	}
 }
 ```
