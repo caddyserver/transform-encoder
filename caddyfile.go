@@ -30,7 +30,7 @@ import (
 // See the godoc on the LogEncoderConfig type for the syntax of
 // subdirectives that are common to most/all encoders.
 func (se *TransformEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
-	foundTemplate := false
+	foundTemplate := 0
 outerloop:
 	for d.Next() {
 		args := d.RemainingArgs()
@@ -38,7 +38,7 @@ outerloop:
 		case 0:
 			se.Template = commonLogFormat
 		default:
-			foundTemplate = true
+			foundTemplate = len(args)
 			se.Template = strings.Join(args, " ")
 		}
 
@@ -56,7 +56,7 @@ outerloop:
 	d.Reset()
 	// consume the directive and the template
 	d.Next()
-	if foundTemplate {
+	for ; foundTemplate > 0; foundTemplate-- {
 		d.Next()
 	}
 	return (&se.LogEncoderConfig).UnmarshalCaddyfile(d)

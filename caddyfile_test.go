@@ -278,6 +278,23 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "transform: unquoted template",
+			fields: fields{
+				LogEncoderConfig: logging.LogEncoderConfig{
+					TimeLocal:  true,
+					TimeFormat: "iso8601",
+				},
+				Template: "[{ts}] {request>method} {request>host} {request>uri} {request>headers>User-Agent>[0]} - {request>proto} {status} {size} -",
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform [{ts}] {request>method} {request>host} {request>uri} {request>headers>User-Agent>[0]} - {request>proto} {status} {size} - {
+					time_local
+					time_format iso8601
+				}`),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
