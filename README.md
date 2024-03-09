@@ -55,7 +55,7 @@ The module comes with one special value of `{common_log}` for the Apache Common 
 The more spelled out way of doing it is:
 
 ```caddyfile
-format transform `{request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}` {
+format transform `{request>remote_ip} - {user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}` {
 	time_format "02/Jan/2006:15:04:05 -0700"
 }
 ```
@@ -65,7 +65,7 @@ format transform `{request>remote_ip} - {request>user_id} [{ts}] "{request>metho
 The more spelled out way of doing it is:
 
 ```caddy
-format transform `{request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
+format transform `{request>remote_ip} - {user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
         time_format "02/Jan/2006:15:04:05 -0700"
 }
 ```
@@ -76,7 +76,7 @@ You can use an alternative value by using the following syntax `{val1:val2}`. Fo
 header as `remote_ip` replacement you can do the following
 
 ```caddy
-format transform `{request>headers>X-Forwarded-For>[0]:request>remote_ip} - {request>user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
+format transform `{request>headers>X-Forwarded-For>[0]:request>remote_ip} - {user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
         time_format "02/Jan/2006:15:04:05 -0700"
 }
 ```
