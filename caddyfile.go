@@ -17,6 +17,8 @@ package transformencoder
 import (
 	"strings"
 
+	"strconv"
+
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 )
 
@@ -30,34 +32,45 @@ import (
 // See the godoc on the LogEncoderConfig type for the syntax of
 // subdirectives that are common to most/all encoders.
 func (se *TransformEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
-	foundTemplate := 0
-outerloop:
 	for d.Next() {
 		args := d.RemainingArgs()
 		switch len(args) {
 		case 0:
 			se.Template = commonLogFormat
 		default:
-			foundTemplate = len(args)
 			se.Template = strings.Join(args, " ")
 		}
 
 		for nesting := d.Nesting(); d.NextBlock(nesting); {
-			if d.Val() == "placeholder" {
+			switch d.Val() {
+			case "placeholder":
 				d.AllArgs(&se.Placeholder)
 				// delete the `placeholder` token and the value, and reset the cursor
 				d.Delete()
 				d.Delete()
-				break outerloop
+			case "unescape_strings":
+				// require an argument
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				b, err := strconv.ParseBool(d.Val())
+				if nil == err {
+					se.UnescapeStrings = b
+				}
+				if d.NextArg() {
+					return d.ArgErr()
+				}
+				d.Delete()
+				d.Delete()
+			default:
+				d.RemainingArgs() //consume line without getting values
 			}
 		}
 	}
 
 	d.Reset()
 	// consume the directive and the template
-	d.Next()
-	for ; foundTemplate > 0; foundTemplate-- {
-		d.Next()
-	}
+	d.RemainingArgs()
+
 	return (&se.LogEncoderConfig).UnmarshalCaddyfile(d)
 }
