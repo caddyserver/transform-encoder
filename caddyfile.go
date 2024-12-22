@@ -17,8 +17,6 @@ package transformencoder
 import (
 	"strings"
 
-	"strconv"
-
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 )
 
@@ -49,19 +47,11 @@ func (se *TransformEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 				d.Delete()
 				d.Delete()
 			case "unescape_strings":
-				// require an argument
-				if !d.NextArg() {
-					return d.ArgErr()
-				}
-				b, err := strconv.ParseBool(d.Val())
-				if nil == err {
-					se.UnescapeStrings = b
-				}
 				if d.NextArg() {
 					return d.ArgErr()
 				}
 				d.Delete()
-				d.Delete()
+				se.UnescapeStrings = true
 			default:
 				d.RemainingArgs() //consume line without getting values
 			}

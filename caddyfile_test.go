@@ -304,7 +304,7 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			},
 			args: args{
 				d: caddyfile.NewTestDispenser(`transform {
-					unescape_strings true
+					unescape_strings
 				}`),
 			},
 			wantErr: false,
@@ -317,7 +317,7 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			},
 			args: args{
 				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}" {
-					unescape_strings true
+					unescape_strings
 				}`),
 			},
 			wantErr: false,
@@ -337,7 +337,7 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}" {
 					time_local
 					placeholder -
-					unescape_strings true
+					unescape_strings
 					time_format iso8601
 				}`),
 			},

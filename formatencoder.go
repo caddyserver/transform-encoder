@@ -158,10 +158,9 @@ func getValue(buf *buffer.Buffer, key string, unescapeStrings bool) (interface{}
 	case jsonparser.String:
 		if !unescapeStrings {
 			return value, true
-		} else {
-			str, _ := jsonparser.ParseString(value)
-			return str, true
 		}
+		str, _ := jsonparser.ParseString(value)
+		return str, true
 	case jsonparser.Array, jsonparser.Boolean, jsonparser.Null, jsonparser.Number, jsonparser.Object, jsonparser.Unknown:
 		// if a value exists, return it as is. A byte is a byte is a byte. The replacer handles them just fine.
 		return value, true

@@ -33,7 +33,7 @@ func TestEncodeEntry(t *testing.T) {
 		expectedLogString string
 	}{
 		{
-			name: "transform: no args",
+			name: "encode entry: no unescape field",
 			se: TransformEncoder{
 				Encoder:  new(logging.JSONEncoder),
 				Template: "{msg} {username}",
@@ -47,7 +47,7 @@ func TestEncodeEntry(t *testing.T) {
 			expectedLogString: "lob\\nlaw john\\ndoe\n",
 		},
 		{
-			name: "transform: no args",
+			name: "encode entry: unescape field",
 			se: TransformEncoder{
 				Encoder:         new(logging.JSONEncoder),
 				Template:        "{msg} {username}",
