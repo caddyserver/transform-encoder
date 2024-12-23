@@ -19,7 +19,6 @@ import (
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/modules/logging"
-	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -67,15 +66,19 @@ func TestEncodeEntry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			err := tt.se.Provision(caddy.Context{})
-			assert.NoError(t, err)
+			if err != nil {
+				t.Fatalf("TransformEncoder.Provision() error = %v", err)
+			}
 
 			buf, err := tt.se.EncodeEntry(tt.entry, tt.fields)
 
 			if err != nil {
-				t.Errorf("TransformEncoder.EncodeEntry() error = %v", err)
+				t.Fatalf("TransformEncoder.EncodeEntry() error = %v", err)
 			}
 
-			assert.Equal(t, tt.expectedLogString, buf.String())
+			if tt.expectedLogString != buf.String() {
+				t.Fatalf("Unexpected encoding error: expected = %+v, received: %+v", tt.expectedLogString, buf)
+			}
 
 		})
 	}
