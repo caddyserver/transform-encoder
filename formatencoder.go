@@ -64,6 +64,7 @@ type TransformEncoder struct {
 	zapcore.Encoder `json:"-"`
 	Template        string `json:"template,omitempty"`
 	Placeholder     string `json:"placeholder,omitempty"`
+	UnescapeStrings bool   `json:"unescape_strings,omitempty"`
 }
 
 func (TransformEncoder) CaddyModule() caddy.ModuleInfo {
@@ -106,6 +107,7 @@ func (se TransformEncoder) Clone() zapcore.Encoder {
 		Encoder:          se.Encoder.Clone(),
 		Template:         se.Template,
 		Placeholder:      se.Placeholder,
+		UnescapeStrings:  se.UnescapeStrings,
 	}
 }
 
@@ -119,7 +121,7 @@ func (se TransformEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 	repl.Map(func(key string) (interface{}, bool) {
 		if strings.Contains(key, ":") {
 			for _, slice := range strings.Split(key, ":") {
-				val, found := getValue(buf, slice)
+				val, found := getValue(buf, slice, se.UnescapeStrings)
 				if found {
 					return val, found
 				}
@@ -128,7 +130,7 @@ func (se TransformEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 			return nil, false
 		}
 
-		return getValue(buf, key)
+		return getValue(buf, key, se.UnescapeStrings)
 	})
 
 	out := repl.ReplaceAll(se.Template, se.Placeholder)
@@ -144,7 +146,7 @@ func (se TransformEncoder) EncodeEntry(ent zapcore.Entry, fields []zapcore.Field
 	return buf, err
 }
 
-func getValue(buf *buffer.Buffer, key string) (interface{}, bool) {
+func getValue(buf *buffer.Buffer, key string, unescapeStrings bool) (interface{}, bool) {
 	path := strings.Split(key, ">")
 	value, dataType, _, err := jsonparser.Get(buf.Bytes(), path...)
 	if err != nil {
@@ -153,7 +155,13 @@ func getValue(buf *buffer.Buffer, key string) (interface{}, bool) {
 	switch dataType {
 	case jsonparser.NotExist:
 		return nil, false
-	case jsonparser.Array, jsonparser.Boolean, jsonparser.Null, jsonparser.Number, jsonparser.Object, jsonparser.String, jsonparser.Unknown:
+	case jsonparser.String:
+		if !unescapeStrings {
+			return value, true
+		}
+		str, _ := jsonparser.ParseString(value)
+		return str, true
+	case jsonparser.Array, jsonparser.Boolean, jsonparser.Null, jsonparser.Number, jsonparser.Object, jsonparser.Unknown:
 		// if a value exists, return it as is. A byte is a byte is a byte. The replacer handles them just fine.
 		return value, true
 	default:

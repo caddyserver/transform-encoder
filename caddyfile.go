@@ -30,34 +30,37 @@ import (
 // See the godoc on the LogEncoderConfig type for the syntax of
 // subdirectives that are common to most/all encoders.
 func (se *TransformEncoder) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
-	foundTemplate := 0
-outerloop:
 	for d.Next() {
 		args := d.RemainingArgs()
 		switch len(args) {
 		case 0:
 			se.Template = commonLogFormat
 		default:
-			foundTemplate = len(args)
 			se.Template = strings.Join(args, " ")
 		}
 
 		for nesting := d.Nesting(); d.NextBlock(nesting); {
-			if d.Val() == "placeholder" {
+			switch d.Val() {
+			case "placeholder":
 				d.AllArgs(&se.Placeholder)
 				// delete the `placeholder` token and the value, and reset the cursor
 				d.Delete()
 				d.Delete()
-				break outerloop
+			case "unescape_strings":
+				if d.NextArg() {
+					return d.ArgErr()
+				}
+				d.Delete()
+				se.UnescapeStrings = true
+			default:
+				d.RemainingArgs() //consume line without getting values
 			}
 		}
 	}
 
 	d.Reset()
 	// consume the directive and the template
-	d.Next()
-	for ; foundTemplate > 0; foundTemplate-- {
-		d.Next()
-	}
+	d.RemainingArgs()
+
 	return (&se.LogEncoderConfig).UnmarshalCaddyfile(d)
 }

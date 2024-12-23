@@ -33,6 +33,7 @@ Apache Common Log Format. The body of the block accepts the custom `placeholder`
 log {
 	format transform [<template>] {
 		placeholder <string>
+		unescape_strings
 		# other fields accepted by JSON encoder
 	}
 }

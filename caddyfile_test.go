@@ -29,6 +29,7 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 		Encoder          zapcore.Encoder
 		Template         string
 		Placeholder      string
+		UnescapeStrings  bool
 	}
 	type args struct {
 		d *caddyfile.Dispenser
@@ -295,6 +296,53 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "transform: not template but given unescape_strings",
+			fields: fields{
+				Template:        commonLogFormat,
+				UnescapeStrings: true,
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform {
+					unescape_strings
+				}`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: given template and given unescape_strings",
+			fields: fields{
+				Template:        "{obj1>obj2>[0]}",
+				UnescapeStrings: true,
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}" {
+					unescape_strings
+				}`),
+			},
+			wantErr: false,
+		},
+		{
+			name: "transform: `placeholder` `unescape_strings` and  property sitting between other properties",
+			fields: fields{
+				Template:        "{obj1>obj2>[0]}",
+				Placeholder:     "-",
+				UnescapeStrings: true,
+				LogEncoderConfig: logging.LogEncoderConfig{
+					TimeLocal:  true,
+					TimeFormat: "iso8601",
+				},
+			},
+			args: args{
+				d: caddyfile.NewTestDispenser(`transform "{obj1>obj2>[0]}" {
+					time_local
+					placeholder -
+					unescape_strings
+					time_format iso8601
+				}`),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -302,10 +350,10 @@ func TestUnmarshalCaddyfile(t *testing.T) {
 				Encoder: new(logging.JSONEncoder),
 			}
 			if err := se.UnmarshalCaddyfile(tt.args.d); (err != nil) != tt.wantErr {
-				t.Errorf("TransformEncoder.UnmarshalCaddyfile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Fatalf("TransformEncoder.UnmarshalCaddyfile() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if se.Template != tt.fields.Template || se.Placeholder != tt.fields.Placeholder || !reflect.DeepEqual(se.LogEncoderConfig, tt.fields.LogEncoderConfig) {
-				t.Errorf("Unexpected marshalling error: expected = %+v, received: %+v", tt.fields, *se)
+			if se.Template != tt.fields.Template || se.Placeholder != tt.fields.Placeholder || se.UnescapeStrings != tt.fields.UnescapeStrings || !reflect.DeepEqual(se.LogEncoderConfig, tt.fields.LogEncoderConfig) {
+				t.Fatalf("Unexpected marshalling error: expected = %+v, received: %+v", tt.fields, *se)
 			}
 		})
 	}
