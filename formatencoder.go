@@ -33,7 +33,7 @@ func init() {
 const (
 	// commonLogFormat is the common log format. https://en.wikipedia.org/wiki/Common_Log_Format
 	commonLogEmptyValue = "-"
-	commonLogFormat     = `{request>remote_ip} ` + commonLogEmptyValue + ` {user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}`
+	commonLogFormat     = `{request>client_ip} ` + commonLogEmptyValue + ` {user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size}`
 	commonLogTimeFormat = "02/Jan/2006:15:04:05 -0700"
 
 	commonLogFormatShortcut = `{common_log}`
