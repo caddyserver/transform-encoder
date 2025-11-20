@@ -1,6 +1,6 @@
 module github.com/caddyserver/transform-encoder
 
-go 1.18
+go 1.24
 
 require (
 	github.com/buger/jsonparser v1.1.1

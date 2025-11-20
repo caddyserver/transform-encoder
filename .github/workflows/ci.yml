@@ -17,31 +17,38 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        go: [ '1.18', '1.19' ]
+        go: [ '1.25' ]
 
         include:
         # Set the minimum Go patch version for the given Go minor
         # Usable via ${{ matrix.GO_SEMVER }}
-        - go: '1.18'
-          GO_SEMVER: '~1.18.4'
-
-        - go: '1.19'
-          GO_SEMVER: '~1.19.0'
+        - go: '1.25'
+          GO_SEMVER: '~1.25.0'
 
     runs-on: ${{ matrix.os }}
 
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: write # to allow uploading artifacts and cache
     steps:
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      with:
+        egress-policy: audit
+
+    - name: Checkout code
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
     - name: Install Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
       with:
         go-version: ${{ matrix.GO_SEMVER }}
         check-latest: true
 
-    - name: Checkout code
-      uses: actions/checkout@v3
-
     - name: Print Go version and environment
       id: vars
+      shell: bash
       run: |
         printf "Using go at: $(which go)\n"
         printf "Go version: $(go version)\n"
@@ -51,24 +58,7 @@ jobs:
         env
         printf "Git version: $(git version)\n\n"
         # Calculate the short SHA1 hash of the git commit
-        echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
-
-    - name: Cache the build cache
-      uses: actions/cache@v2
-      with:
-        # In order:
-        # * Module download cache
-        # * Build cache (Linux)
-        # * Build cache (Mac)
-        # * Build cache (Windows)
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-          ~/Library/Caches/go-build
-          ~\AppData\Local\go-build
-        key: ${{ runner.os }}-${{ matrix.go }}-go-ci-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.go }}-go-ci
+        echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
     - name: Get dependencies
       run: |
