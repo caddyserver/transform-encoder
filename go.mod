@@ -3,7 +3,7 @@ module github.com/caddyserver/transform-encoder
 go 1.24.0
 
 require (
-	github.com/buger/jsonparser v1.1.1
+	github.com/buger/jsonparser v1.1.2
 	github.com/caddyserver/caddy/v2 v2.9.0
 	go.uber.org/zap v1.27.0
 )
